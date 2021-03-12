@@ -1,6 +1,6 @@
 # Merge Request Tools
 
-Chrome plugin to help with merge requests. Currently has 2 features: 
+Chrome plugin to help with Gitlab merge requests. Currently has 2 features: 
 
 * Filtering MR files with wildcard patterns (help improve responsiveness for massive MRs)
 * Checkboxes to filter out renamed / deleted files since these don't require much review
