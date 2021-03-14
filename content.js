@@ -211,10 +211,22 @@ function initialiseControls() {
 
     treeHide(fullFileTree, options, "", []);
 
-    $(linesChangedSelector).find(".js-file-addition-line").first().text(currentLinesAdded);
-    $(linesChangedSelector).find(".js-file-deletion-line").first().text(currentLinesDeleted);
-    $("#diffs-tab").find(".badge.badge-pill").first().text(currentFiles);
-    $(linesChangedSelector).find(".text-secondary.bold").first().text(currentFiles + " files");
+    const additionLine = $(linesChangedSelector).find(".js-file-addition-line").first();
+    const deletionLine = $(linesChangedSelector).find(".js-file-deletion-line").first();
+    const filesChanged = $("#diffs-tab").find(".badge.badge-pill").first();
+    const filesChanged2 =  $(linesChangedSelector).find(".text-secondary.bold").first();
+
+    additionLine.text(currentLinesAdded).addClass("ping");
+    deletionLine.text(currentLinesDeleted).addClass("ping");
+    filesChanged.text(currentFiles).addClass("ping");
+    filesChanged2.text(currentFiles + " files").addClass("ping");
+    
+    setTimeout(_ => {
+      additionLine.removeClass("ping");
+      deletionLine.removeClass("ping");
+      filesChanged.removeClass("ping");
+      filesChanged2.removeClass("ping");
+    }, 1000);
   }
 
   $("#apply-file-filters").click(applyFilter);
@@ -267,7 +279,7 @@ function hideDir(tree) {
     }
   });
   if (tree.ref) {
-    if (tree.visibleFilesThisLevel == 0) {
+    if (!tree.collapsed && tree.visibleFilesThisLevel == 0) {
       $(tree.ref).hide();
     } else {
       $(tree.ref).show();
@@ -343,10 +355,23 @@ function treeRecurse(treeObject, levelElement, parentDirs) {
 
   const children = Array.from(levelElement.children);
 
-  // Top level file
+  const dirInformation = {
+    files: [],
+    dirs: {},
+    ref: levelElement
+  };
+
   if (children.length == 1) {
-    treeObject.files.push(getFileDetails(children[0]));
-    return;
+    // Top level file 
+    if (!children[0].classList.contains("folder")) {
+      treeObject.files.push(getFileDetails(children[0]));
+      return;
+    } else {
+      // collapsed directory
+      dirInformation.collapsed = true;
+      treeObject.dirs[dirName] = dirInformation;
+      return;
+    }
   }
 
   const fullDirName = children.shift().title;
@@ -354,23 +379,19 @@ function treeRecurse(treeObject, levelElement, parentDirs) {
     dirName = fullDirName;
   }
 
-  if (!treeObject.dirs[dirName]) {
-    treeObject.dirs[dirName] = {}
-  }
+  treeObject.dirs[dirName] = dirInformation;
 
   const fileChildren = children.filter(c => {
     return c.firstChild.firstChild.children.length == 3;
   }).map(getFileDetails);
 
-  treeObject.dirs[dirName] = {
-    files: fileChildren,
-    dirs: {},
-    ref: levelElement
-  };
+  treeObject.dirs[dirName].files = fileChildren;
 
-  children.filter(c => {
+  const directoryChildren = children.filter(c => {
     return c.firstChild.firstChild.children.length == 2;
-  }).forEach(d => {
+  })
+  
+  directoryChildren.forEach(d => {
     return treeRecurse(treeObject.dirs[dirName], d, [...parentDirs, dirName]);
   });
 }

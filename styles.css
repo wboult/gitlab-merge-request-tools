@@ -1,0 +1,17 @@
+.ping {
+	animation: ping 1s;
+}
+
+@keyframes ping {
+	0% {
+		font-size: 14px;
+	}
+	
+	50% {
+		font-size: 18px;
+	}
+	
+	100% {
+		font-size: 14px;
+	}
+}
