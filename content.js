@@ -358,7 +358,8 @@ function treeRecurse(treeObject, levelElement, parentDirs) {
   const dirInformation = {
     files: [],
     dirs: {},
-    ref: levelElement
+    ref: levelElement,
+    collapsed: false
   };
 
   if (children.length == 1) {
