@@ -40,6 +40,7 @@ let totalLinesDeleted;
 let totalFiles;
 let totalDeletedFiles = 0;
 let totalRenamedFiles = 0;
+let totalImportOnlyFiles = 0;
 
 function storeTotalLinesChanged() {
   totalAdded = $(linesChangedSelector).find(".js-file-addition-line").first().text() * 1;
@@ -60,11 +61,13 @@ function getFileInformation() {
       const fileName = file.getAttribute("data-path").split("/").slice(-1)[0];
       if (!loadedFiles[filePath]) {
         loadedFiles[filePath] = "loaded";
+        const importOnly = isImportOnly(file);
         fileInformation.push({
           filePath: filePath,
           fileName: fileName,
           linesAdded: linesAdded,
-          linesDeleted: linesDeleted
+          linesDeleted: linesDeleted,
+          importOnly: importOnly
         });
         if (linesDeleted > 0 && linesAdded === 0) {
           totalDeletedFiles = totalDeletedFiles + 1;
@@ -81,6 +84,15 @@ function getFileInformation() {
           const children = checkboxLabel.children();
           checkboxLabel
             .text("Exclude " + totalRenamedFiles + " renamed files")
+            .append(children)
+            .show();
+        }
+        if (importOnly) {
+          totalImportOnlyFiles = totalImportOnlyFiles + 1;
+          const checkboxLabel = $("label[for='exclude-import-only-files']")
+          const children = checkboxLabel.children();
+          checkboxLabel
+            .text("Exclude " + totalImportOnlyFiles + " import-only diff files")
             .append(children)
             .show();
         }
@@ -116,6 +128,10 @@ function initialiseControls() {
                   Exclude deleted files
                   <input id="exclude-deleted-files" type="checkbox" style="margin-left: 10px"></input>
               </label>
+              <label for="exclude-import-only-files" style="display: none">
+                  Exclude import-only diff files
+                  <input id="exclude-import-only-files" type="checkbox" style="margin-left: 10px"></input>
+              </label>
               <label for="exclude-renamed-files" style="display: none">
                   Exclude renamed files
                   <input id="exclude-renamed-files" type="checkbox" style="margin-left: 10px"></input>
@@ -136,6 +152,7 @@ function initialiseControls() {
     $("#include-file-filter-patternx").val(undefined);
     $("#exclude-file-filter-patternx").val(undefined);
     $("#exclude-deleted-files").prop('checked', false);
+    $("#exclude-import-only-files").prop('checked', false);
     $("#exclude-renamed-files").prop('checked', false);
     applyFilter();
     $("#clear-filters").prop('disabled', true);
@@ -150,8 +167,9 @@ function initialiseControls() {
     const excludePattern = $("#exclude-file-filter-patternx").val();
     const excludeDeletedFiles = $("#exclude-deleted-files").prop('checked');
     const excludeRenamedFiles = $("#exclude-renamed-files").prop('checked');
+    const excludeImportOnlyFiles = $("#exclude-import-only-files").prop('checked');
 
-    if (includePattern || excludePattern || excludeDeletedFiles || excludeRenamedFiles) {
+    if (includePattern || excludePattern || excludeDeletedFiles || excludeRenamedFiles || excludeImportOnlyFiles) {
       $("#clear-filters").prop('disabled', false);
     }
 
@@ -183,6 +201,12 @@ function initialiseControls() {
         fileHidden = true;
       }
       if (excludeRenamedFiles && fileInfo.linesAdded === 0 && fileInfo.linesDeleted === 0) {
+        if (!fileHidden) {
+          currentFiles = currentFiles - 1;
+        }
+        fileHidden = true;
+      }
+      if (excludeImportOnlyFiles && fileInfo.importOnly) {
         if (!fileHidden) {
           currentFiles = currentFiles - 1;
         }
@@ -299,6 +323,7 @@ function storeFileTree() {
   });
 
   fixTruncatedPaths(fullFileTree);
+  console.log(fullFileTree);
 }
 
 function fixTruncatedPaths(tree) {
@@ -407,4 +432,24 @@ function getFileDetails(element) {
     linesDeleted: linesDeleted,
     ref: element
   };
+}
+
+function isImportOnly(file) {
+  const importLines = $(file).find("span.k:first-child:contains(import)").parent().parent();
+  
+  if (!importLines.length) return false;
+
+  const lineNumbers = importLines.parent().parent().find("a[data-linenumber]");
+  const firstImportLine = lineNumbers.first().attr("data-linenumber") * 1;
+  const lastImportLine = lineNumbers.last().attr("data-linenumber") * 1;
+
+  const diffLineNumbers = $(file).find("div.old_line,div.new_line").find("a[data-linenumber]");
+  const firstDiffLine = diffLineNumbers.first().attr("data-linenumber") * 1;
+  const lastDiffLine = diffLineNumbers.last().attr("data-linenumber") * 1;
+
+  if (
+    firstDiffLine >= firstImportLine &&
+    lastDiffLine <= lastImportLine
+  ) return true;
+  else return false;
 }
