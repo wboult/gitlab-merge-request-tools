@@ -13,3 +13,10 @@ Filtered out files are set to "display: none", both in the diffs and the tree vi
 ## GIF example
 
 ![File filters](image/example.gif)
+
+## Feature ideas
+
+A few ideas for other features that might be useful:
+
+* Checkbox to remove diff files that just contain changes to imports (can get a lot of these for refactoring MRs)
+* Checkbox to filter to only files with comments on them (useful for the author when addressing a review)
