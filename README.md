@@ -1,3 +1,7 @@
+# Chrome Web Store
+
+https://chrome.google.com/webstore/detail/gitlab-merge-request-tool/klmolglmdnonbebfmcnbmdccmafjhnac
+
 # Merge Request Tools
 
 Chrome plugin to help with Gitlab merge requests. Currently has 2 features: 
