@@ -42,20 +42,20 @@ let totalDeletedFiles = 0;
 let totalRenamedFiles = 0;
 
 function storeTotalLinesChanged() {
-  totalAdded = $(linesChangedSelector).find(".js-file-addition-line").first().text() * 1;
-  totalLinesDeleted = $(linesChangedSelector).find(".js-file-deletion-line").first().text() * 1;
+  totalAdded = $(linesChangedSelector).find("span[data-testid='js-file-addition-line']").first().text() * 1;
+  totalLinesDeleted = $(linesChangedSelector).find("span[data-testid='js-file-deletion-line']").first().text() * 1;
   totalFiles = parseInt($(linesChangedSelector).find(".text-secondary.bold").first().text(), 10);
 }
 
 function getFileInformation() {
   $(".diff-files-holder").children().each(function (_, file) {
     if (
-      file.getElementsByClassName("js-file-deletion-line").length > 0 &&
-      file.getElementsByClassName("js-file-addition-line").length > 0 &&
+      file.querySelectorAll("span[data-testid='js-file-addition-line']").length > 0 &&
+      file.querySelectorAll("span[data-testid='js-file-deletion-line']").length > 0 &&
       file.getAttribute("data-path")
     ) {
-      const linesAdded = file.getElementsByClassName("js-file-addition-line")[0].innerText * 1;
-      const linesDeleted = file.getElementsByClassName("js-file-deletion-line")[0].innerText * 1;
+      const linesAdded = file.querySelectorAll("span[data-testid='js-file-addition-line']")[0].innerText * 1;
+      const linesDeleted = file.querySelectorAll("span[data-testid='js-file-deletion-line']")[0].innerText * 1;
       const filePath = file.getAttribute("data-path");
       const fileName = file.getAttribute("data-path").split("/").slice(-1)[0];
       if (!loadedFiles[filePath]) {
@@ -211,8 +211,8 @@ function initialiseControls() {
 
     treeHide(fullFileTree, options, "", []);
 
-    const additionLine = $(linesChangedSelector).find(".js-file-addition-line").first();
-    const deletionLine = $(linesChangedSelector).find(".js-file-deletion-line").first();
+    const additionLine = $(linesChangedSelector).find("span[data-testid='js-file-addition-line']").first();
+    const deletionLine = $(linesChangedSelector).find("span[data-testid='js-file-deletion-line']").first();
     const filesChanged = $("#diffs-tab").find(".badge.badge-pill").first();
     const filesChanged2 =  $(linesChangedSelector).find(".text-secondary.bold").first();
 
